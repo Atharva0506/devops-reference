@@ -1,0 +1,64 @@
+{
+  "success": true,
+  "error": null,
+  "results": {
+    "detectors": [
+      {
+        "check": "reentrancy-eth",
+        "impact": "High",
+        "confidence": "Medium",
+        "description": "Reentrancy in InvoiceManager.payInvoice(bytes32): External call IERC20(invoice.token).transferFrom(msg.sender,invoice.recipient,invoice.amount) at line 108 is followed by state write invoice.status = Status.Paid at line 112.",
+        "elements": [
+          {
+            "source_mapping": {
+              "filename_relative": "contracts/InvoiceManager.sol",
+              "lines": [108, 109, 110, 111, 112]
+            }
+          }
+        ]
+      },
+      {
+        "check": "unchecked-transfer",
+        "impact": "High",
+        "confidence": "Medium",
+        "description": "InvoiceManager.payInvoice(bytes32) ignores return value of IERC20(invoice.token).transferFrom(msg.sender,invoice.recipient,invoice.amount) at line 108.",
+        "elements": [
+          {
+            "source_mapping": {
+              "filename_relative": "contracts/InvoiceManager.sol",
+              "lines": [108]
+            }
+          }
+        ]
+      },
+      {
+        "check": "solc-version",
+        "impact": "Informational",
+        "confidence": "High",
+        "description": "Pragma version ^0.8.24 allows old versions.",
+        "elements": [
+          {
+            "source_mapping": {
+              "filename_relative": "contracts/InvoiceManager.sol",
+              "lines": [2]
+            }
+          }
+        ]
+      },
+      {
+        "check": "naming-convention",
+        "impact": "Informational",
+        "confidence": "High",
+        "description": "Parameter InvoiceManager.createInvoice(address,uint256,address).recipient is not in mixedCase.",
+        "elements": [
+          {
+            "source_mapping": {
+              "filename_relative": "contracts/InvoiceManager.sol",
+              "lines": [65]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

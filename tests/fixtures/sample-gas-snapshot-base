@@ -1,0 +1,8 @@
+InvoiceManagerTest:testCreateInvoice(address,uint256,address) (gas: 145230)
+InvoiceManagerTest:testPayInvoice(bytes32) (gas: 89450)
+InvoiceManagerTest:testCancelInvoice(bytes32) (gas: 52100)
+InvoiceManagerTest:testGetStatus(bytes32) (gas: 28900)
+InvoiceManagerTest:testCreateInvoiceZeroAmount() (gas: 24100)
+InvoiceManagerTest:testCreateInvoiceSelfInvoice() (gas: 23800)
+InvoiceManagerTest:testPayAlreadyPaid() (gas: 95200)
+InvoiceManagerTest:testCancelNotCreator() (gas: 55300)

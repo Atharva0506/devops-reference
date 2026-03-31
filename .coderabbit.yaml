@@ -1,0 +1,30 @@
+# CodeRabbit configuration for StabilityNexus contract repos.
+# Free for all public/open-source repositories.
+# Docs: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+
+reviews:
+  # Automatically review every PR
+  auto_review:
+    enabled: true
+    # Skip draft PRs
+    drafts: false
+    # Review profile: CHILL reduces noise on formatting-only changes
+    profile: CHILL
+
+  # Files to skip during review
+  path_filters:
+    - "!out/**"
+    - "!cache/**"
+    - "!node_modules/**"
+    - "!lib/**"
+    - "!*.lock"
+    - "!.gas-snapshot*"
+
+  # Request changes on high severity issues
+  request_changes_workflow: true
+
+# Chat configuration
+chat:
+  auto_reply: true
