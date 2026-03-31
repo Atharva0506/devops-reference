@@ -130,4 +130,16 @@ contract InvoiceManager {
     function getStatus(bytes32 invoiceId) external view returns (Status) {
         return invoices[invoiceId].status;
     }
+
+    /// @notice Returns statuses for multiple invoices in a single call.
+    /// @param invoiceIds Array of invoice IDs to query.
+    /// @return statuses Array of status enum values.
+    function getBatchStatuses(bytes32[] calldata invoiceIds) external view returns (Status[] memory) {
+        Status[] memory statuses = new Status[](invoiceIds.length);
+        for (uint256 i = 0; i < invoiceIds.length; i++) {
+            statuses[i] = invoices[invoiceIds[i]].status;
+        }
+        return statuses;
+    }
 }
+
