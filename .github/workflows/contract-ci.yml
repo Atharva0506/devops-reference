@@ -70,8 +70,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
+          set +e
           python3 tools/parse-slither.py slither-output.json > slither-comment.md
           EXIT_CODE=$?
+          set -e
           gh pr comment "$PR_NUMBER" --body-file slither-comment.md
           exit $EXIT_CODE
 
