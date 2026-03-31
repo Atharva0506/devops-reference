@@ -20,9 +20,9 @@ jobs:
 
             // Required sections from AOSSIE PR template
             const checks = [
-              { section: 'Addressed Issues', pattern: '### Addressed Issues' },
-              { section: 'AI Usage Disclosure', pattern: '### AI Usage Disclosure' },
-              { section: 'Checklist', pattern: '## Checklist' },
+              { section: 'Addressed Issues', pattern: /###\s+Addressed Issues/i },
+              { section: 'AI Usage Disclosure', pattern: /###\s+AI Usage Disclosure/i },
+              { section: 'Checklist', pattern: /##\s+Checklist/i },
             ];
 
             // Check that at least one AI checkbox is checked
@@ -32,7 +32,7 @@ jobs:
               body.includes('[X] This PR does not contain AI-generated code at all') ||
               body.includes('[X] This PR contains AI-generated code');
 
-            const missingSections = checks.filter(c => !body.includes(c.pattern));
+            const missingSections = checks.filter(c => !c.pattern.test(body));
             const problems = [];
 
             if (missingSections.length > 0) {
