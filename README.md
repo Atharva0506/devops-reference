@@ -61,3 +61,4 @@ Makefile                # dev, test, slither, gas-report, lint, clean
 5. Copy `.gitleaks.toml` for secret detection
 
 Three config variables. One PR. Full CI baseline.
+
