@@ -1,0 +1,94 @@
+name: Auto Label PR
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  label:
+    name: Auto Label
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Label PR based on changed files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+
+            const filePaths = files.map(f => f.filename);
+            const labelsToAdd = new Set();
+
+            // Determine labels based on file paths
+            const labelRules = [
+              { pattern: /^contracts\//, label: 'contracts', color: '3b82f6', desc: 'Changes to Solidity contracts' },
+              { pattern: /^\.github\/workflows\//, label: 'ci', color: '8b5cf6', desc: 'CI/CD workflow changes' },
+              { pattern: /^tools\//, label: 'tooling', color: '6b7280', desc: 'Changes to DevOps tooling scripts' },
+              { pattern: /^docs\/|README/, label: 'documentation', color: '0ea5e9', desc: 'Documentation changes' },
+              { pattern: /^tests?\//, label: 'tests', color: '22c55e', desc: 'Test changes' },
+              { pattern: /^docker|^Makefile/, label: 'devenv', color: 'f59e0b', desc: 'Developer environment changes' },
+              { pattern: /\.toml$|\.conf$|\.yaml$|\.yml$/, label: 'config', color: '64748b', desc: 'Configuration file changes' },
+              { pattern: /^src\/|^pages\/|^components\//, label: 'frontend', color: 'ec4899', desc: 'Frontend code changes' },
+            ];
+
+            for (const file of filePaths) {
+              for (const rule of labelRules) {
+                if (rule.pattern.test(file)) {
+                  labelsToAdd.add(rule);
+                }
+              }
+            }
+
+            // PR size labels
+            const totalChanges = files.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            if (totalChanges <= 10) {
+              labelsToAdd.add({ label: 'size/XS', color: '22c55e', desc: 'Extra small PR (≤10 lines)' });
+            } else if (totalChanges <= 50) {
+              labelsToAdd.add({ label: 'size/S', color: '86efac', desc: 'Small PR (≤50 lines)' });
+            } else if (totalChanges <= 200) {
+              labelsToAdd.add({ label: 'size/M', color: 'fbbf24', desc: 'Medium PR (≤200 lines)' });
+            } else if (totalChanges <= 500) {
+              labelsToAdd.add({ label: 'size/L', color: 'f97316', desc: 'Large PR (≤500 lines)' });
+            } else {
+              labelsToAdd.add({ label: 'size/XL', color: 'ef4444', desc: 'Extra large PR (>500 lines)' });
+            }
+
+            // Create labels if they don't exist, then apply
+            for (const rule of labelsToAdd) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: rule.label,
+                });
+              } catch (e) {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: rule.label,
+                  color: rule.color,
+                  description: rule.desc,
+                });
+              }
+            }
+
+            const labelNames = [...labelsToAdd].map(r => r.label);
+            if (labelNames.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: labelNames,
+              });
+            }
+
+            console.log(`Applied labels: ${labelNames.join(', ')}`);

@@ -1,49 +1,36 @@
-## Description
+###  Addressed Issues:
 
-<!-- What does this PR do? Keep it concise. -->
-
-
-## Type of Change
-
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-- [ ] CI/DevOps improvement
-- [ ] Refactor (no functional change)
-
-## Related Issues
-
-<!-- Link any related issues: Fixes #123, Closes #456 -->
+Fixes #(TODO:issue number)
 
 
-## Changes Made
+###  Screenshots/Recordings:
 
-<!-- List the specific changes. Be concrete. -->
+TODO: If applicable, add screenshots or recordings that demonstrate the interface **before** and **after** the changes.
 
--
--
--
 
-## Testing
+###  Additional Notes:
+<!-- Add any additional information, context, or notes for reviewers -->
 
-<!-- How did you verify this works? -->
+### AI Usage Disclosure:
 
-- [ ] Unit tests added/updated
-- [ ] Ran `make test` locally
-- [ ] Ran `make slither` locally (contract changes only)
-- [ ] Manual testing done
+We encourage contributors to use AI tools responsibly when creating Pull Requests. While AI can be a valuable aid, it is essential to ensure that your contributions meet the task requirements, build successfully, include relevant tests, and pass all linters. Submissions that do not meet these standards may be closed without warning to maintain the quality and integrity of the project. Please take the time to understand the changes you are proposing and their impact. AI slop is strongly discouraged and may lead to banning and blocking. Do not spam our repos with AI slop.
 
-## Screenshots
+Check one of the checkboxes below:
 
-<!-- If applicable, add screenshots showing the change. -->
+- [ ] This PR does not contain AI-generated code at all.
+- [ ] This PR contains AI-generated code. I have read the [AI Usage Policy](https://github.com/AOSSIE-Org/Info/blob/main/AI-UsagePolicy.md) and this PR complies with this policy. I have tested the code locally and I am responsible for it.
+
+I have used the following AI models and tools: TODO
 
 
 ## Checklist
-
-- [ ] My code follows the project style guidelines
-- [ ] I have performed a self-review of my code
-- [ ] I have added comments where the logic is not obvious
-- [ ] My changes do not introduce new warnings
-- [ ] I have checked that `forge fmt` passes (contract changes)
-- [ ] I have checked that `eslint` passes (frontend changes)
+<!-- Mark items with [x] to indicate completion -->
+- [ ] My PR addresses a single issue, fixes a single bug or makes a single improvement.
+- [ ] My code follows the project's code style and conventions
+- [ ] If applicable, I have made corresponding changes or additions to the documentation
+- [ ] If applicable, I have made corresponding changes or additions to tests
+- [ ] My changes generate no new warnings or errors
+- [ ] I have joined the [Discord server](https://discord.gg/hjUhu33uAn) and I will share a link to this PR with the project maintainers there
+- [ ] I have read the [Contribution Guidelines](../CONTRIBUTING.md)
+- [ ] Once I submit my PR, CodeRabbit AI will automatically review it and I will address CodeRabbit's comments.
+- [ ] I have filled this PR template completely and carefully, and I understand that my PR may be closed without review otherwise.

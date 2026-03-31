@@ -1,0 +1,35 @@
+name: Branch Naming Check
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  check-branch:
+    name: Verify Branch Name
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check branch naming convention
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+
+            // Allowed patterns:
+            // feat/description, fix/description, docs/description,
+            // ci/description, refactor/description, test/description,
+            // chore/description, demo/description
+            const validPattern = /^(feat|fix|docs|ci|refactor|test|chore|demo)\/.+$/;
+
+            if (!validPattern.test(branch)) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `⚠️ **Branch Naming Convention**\n\nBranch \`${branch}\` does not follow the naming convention.\n\nExpected format: \`type/description\`\n\nAllowed types: \`feat\`, \`fix\`, \`docs\`, \`ci\`, \`refactor\`, \`test\`, \`chore\`, \`demo\`\n\nExamples:\n- \`feat/add-batch-queries\`\n- \`fix/reentrancy-in-pay-invoice\`\n- \`ci/add-slither-scanning\``,
+              });
+
+              core.warning(`Branch "${branch}" does not follow naming convention.`);
+            }

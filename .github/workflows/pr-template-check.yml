@@ -12,69 +12,82 @@ jobs:
       pull-requests: write
       issues: write
     steps:
-      - name: Check PR follows template
+      - name: Check PR follows AOSSIE template
         uses: actions/github-script@v7
         with:
           script: |
             const body = context.payload.pull_request.body || '';
 
-            // Required sections from the PR template
-            const requiredSections = [
-              '## Description',
-              '## Type of Change',
-              '## Changes Made',
-              '## Testing',
-              '## Checklist',
+            // Required sections from AOSSIE PR template
+            const checks = [
+              { section: 'Addressed Issues', pattern: '### Addressed Issues' },
+              { section: 'AI Usage Disclosure', pattern: '### AI Usage Disclosure' },
+              { section: 'Checklist', pattern: '## Checklist' },
             ];
 
-            const missingSections = requiredSections.filter(
-              section => !body.includes(section)
-            );
+            // Check that at least one AI checkbox is checked
+            const aiChecked =
+              body.includes('[x] This PR does not contain AI-generated code at all') ||
+              body.includes('[x] This PR contains AI-generated code');
+
+            // Check that TODO placeholders have been filled in
+            const hasTodoIssue = body.includes('Fixes #(TODO:issue number)');
+            const hasTodoAI = body.match(/I have used the following AI models and tools:\s*TODO\s*$/m);
+
+            const missingSections = checks.filter(c => !body.includes(c.pattern));
+            const problems = [];
+
+            if (missingSections.length > 0) {
+              problems.push(`Missing required sections:\n${missingSections.map(s => `- ${s.section}`).join('\n')}`);
+            }
+            if (!aiChecked) {
+              problems.push('Neither AI Usage checkbox is checked. Please check one.');
+            }
+            if (hasTodoIssue) {
+              problems.push('Issue number still says TODO. Please link the actual issue.');
+            }
+            if (hasTodoAI && aiChecked && body.includes('[x] This PR contains AI-generated code')) {
+              problems.push('AI tools field still says TODO. Please list the tools you used.');
+            }
 
             const labelName = 'missing-pr-template';
 
-            if (missingSections.length > 0) {
-              // Add label
+            if (problems.length > 0) {
+              // Create label if it doesn't exist
               try {
-                await github.rest.issues.addLabels({
+                await github.rest.issues.getLabel({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  labels: [labelName],
+                  name: labelName,
                 });
               } catch (e) {
-                // Label might not exist yet, create it
-                try {
-                  await github.rest.issues.createLabel({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: labelName,
-                    color: 'e74c3c',
-                    description: 'PR does not follow the standard template',
-                  });
-                  await github.rest.issues.addLabels({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: context.payload.pull_request.number,
-                    labels: [labelName],
-                  });
-                } catch (labelError) {
-                  core.warning(`Could not create/add label: ${labelError.message}`);
-                }
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: labelName,
+                  color: 'e74c3c',
+                  description: 'PR does not follow the AOSSIE PR template',
+                });
               }
 
-              // Post a comment
-              const missingList = missingSections.map(s => `- ${s}`).join('\n');
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: [labelName],
+              });
+
+              const problemList = problems.map(p => `- ${p}`).join('\n');
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: `⚠️ **PR Template Check Failed**\n\nThis PR is missing the following required sections:\n\n${missingList}\n\nPlease update the PR description to follow the [standard template](/.github/pull_request_template.md).`,
+                body: `⚠️ **PR Template Check Failed**\n\n${problemList}\n\nPlease update the PR description to follow the [AOSSIE PR template](/.github/pull_request_template.md).`,
               });
 
-              core.setFailed(`PR is missing ${missingSections.length} required section(s).`);
+              core.setFailed(`PR template issues found: ${problems.length}`);
             } else {
-              // Remove label if it exists
+              // Remove label if PR is now compliant
               try {
                 await github.rest.issues.removeLabel({
                   owner: context.repo.owner,
@@ -83,6 +96,6 @@ jobs:
                   name: labelName,
                 });
               } catch (e) {
-                // Label wasn't there, that's fine
+                // Label wasn't there
               }
             }
