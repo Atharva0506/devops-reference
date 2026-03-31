@@ -25,11 +25,19 @@ jobs:
             // Only run on PRs
             if (!context.payload.pull_request) return;
 
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            });
+            let pr;
+            let retries = 5;
+            while (retries > 0) {
+              const { data } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+              });
+              pr = data;
+              if (pr.mergeable !== null) break;
+              await new Promise(r => setTimeout(r, 2000));
+              retries--;
+            }
 
             const labelName = 'has-merge-conflict';
 
@@ -79,4 +87,3 @@ jobs:
                 // Label wasn't there
               }
             }
-            // If mergeable is null, GitHub is still computing. Skip.
