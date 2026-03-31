@@ -2,7 +2,7 @@ name: PR Template Check
 
 on:
   pull_request:
-    types: [opened, edited]
+    types: [opened, edited, synchronize]
 
 jobs:
   check-template:
