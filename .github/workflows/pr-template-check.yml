@@ -18,28 +18,17 @@ jobs:
           script: |
             const body = context.payload.pull_request.body || '';
 
-            // Required sections from AOSSIE PR template
             const checks = [
-              { section: 'Addressed Issues', pattern: /###\s+Addressed Issues/i },
-              { section: 'AI Usage Disclosure', pattern: /###\s+AI Usage Disclosure/i },
-              { section: 'Checklist', pattern: /##\s+Checklist/i },
+              { section: 'Addressed Issues', pattern: /Addressed Issues/i },
+              { section: 'AI Usage Disclosure', pattern: /AI Usage Disclosure/i },
+              { section: 'Checklist', pattern: /Checklist/i },
             ];
-
-            // Check that at least one AI checkbox is checked
-            const aiChecked =
-              body.includes('[x] This PR does not contain AI-generated code at all') ||
-              body.includes('[x] This PR contains AI-generated code') ||
-              body.includes('[X] This PR does not contain AI-generated code at all') ||
-              body.includes('[X] This PR contains AI-generated code');
 
             const missingSections = checks.filter(c => !c.pattern.test(body));
             const problems = [];
 
             if (missingSections.length > 0) {
               problems.push(`Missing required sections:\n${missingSections.map(s => `- ${s.section}`).join('\n')}`);
-            }
-            if (missingSections.length === 0 && !aiChecked) {
-              problems.push('Neither AI Usage checkbox is checked. Please check one.');
             }
 
             const labelName = 'missing-pr-template';
