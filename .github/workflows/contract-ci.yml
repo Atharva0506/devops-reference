@@ -55,14 +55,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # Generate the comment markdown
+          set +e
           python3 tools/parse-slither.py slither-output.json > slither-comment.md
           EXIT_CODE=$?
-
-          # Post as PR comment
+          set -e
           gh pr comment "$PR_NUMBER" --body-file slither-comment.md
-
-          # Exit with the parse script's code (1 if HIGH findings)
           exit $EXIT_CODE
 
   gas-report:

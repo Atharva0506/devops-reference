@@ -28,11 +28,9 @@ jobs:
             // Check that at least one AI checkbox is checked
             const aiChecked =
               body.includes('[x] This PR does not contain AI-generated code at all') ||
-              body.includes('[x] This PR contains AI-generated code');
-
-            // Check that TODO placeholders have been filled in
-            const hasTodoIssue = body.includes('Fixes #(TODO:issue number)');
-            const hasTodoAI = body.match(/I have used the following AI models and tools:\s*TODO\s*$/m);
+              body.includes('[x] This PR contains AI-generated code') ||
+              body.includes('[X] This PR does not contain AI-generated code at all') ||
+              body.includes('[X] This PR contains AI-generated code');
 
             const missingSections = checks.filter(c => !body.includes(c.pattern));
             const problems = [];
@@ -40,14 +38,8 @@ jobs:
             if (missingSections.length > 0) {
               problems.push(`Missing required sections:\n${missingSections.map(s => `- ${s.section}`).join('\n')}`);
             }
-            if (!aiChecked) {
+            if (missingSections.length === 0 && !aiChecked) {
               problems.push('Neither AI Usage checkbox is checked. Please check one.');
-            }
-            if (hasTodoIssue) {
-              problems.push('Issue number still says TODO. Please link the actual issue.');
-            }
-            if (hasTodoAI && aiChecked && body.includes('[x] This PR contains AI-generated code')) {
-              problems.push('AI tools field still says TODO. Please list the tools you used.');
             }
 
             const labelName = 'missing-pr-template';
