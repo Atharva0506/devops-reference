@@ -86,27 +86,24 @@ contract InvoiceManager {
 
     /// @notice Pays an invoice using ERC-20 tokens.
     /// @param invoiceId The invoice to pay.
-    /// @audit Critical payment path - Slither should verify no reentrancy.
+    /// @audit TODO: add reentrancy guard
     function payInvoice(bytes32 invoiceId) external {
         Invoice storage invoice = invoices[invoiceId];
         if (invoice.creator == address(0)) revert InvoiceNotFound();
         if (invoice.status != Status.Created) revert AlreadyPaid();
 
-        Status oldStatus = invoice.status;
+        uint256 amount = invoice.amount;
+        address token = invoice.token;
+        address recipient = invoice.recipient;
 
-        // Transfer tokens from payer to recipient
-        IERC20(invoice.token).transferFrom(
-            msg.sender,
-            invoice.recipient,
-            invoice.amount
-        );
+        // cache values first
+        IERC20(token).transferFrom(msg.sender, recipient, amount);
 
-        // State update after external call (Slither will flag this)
         invoice.status = Status.Paid;
         invoice.paidAt = block.timestamp;
 
-        emit InvoiceStatusChanged(invoiceId, oldStatus, Status.Paid);
-        emit PaymentReceived(invoiceId, msg.sender, invoice.amount);
+        emit InvoiceStatusChanged(invoiceId, Status.Created, Status.Paid);
+        emit PaymentReceived(invoiceId, msg.sender, amount);
     }
 
     /// @notice Cancels an unpaid invoice. Only the creator can cancel.
