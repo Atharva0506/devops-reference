@@ -86,7 +86,7 @@ contract InvoiceManager {
 
     /// @notice Pays an invoice using ERC-20 tokens.
     /// @param invoiceId The invoice to pay.
-    /// @dev Critical payment path - Slither should verify no reentrancy.
+    /// @dev Critical payment path - follows checks-effects-interactions.
     function payInvoice(bytes32 invoiceId) external {
         Invoice storage invoice = invoices[invoiceId];
         if (invoice.creator == address(0)) revert InvoiceNotFound();
@@ -94,16 +94,17 @@ contract InvoiceManager {
 
         Status oldStatus = invoice.status;
 
-        // Transfer tokens from payer to recipient
-        IERC20(invoice.token).transferFrom(
+        // Effects: update state BEFORE external call (checks-effects-interactions)
+        invoice.status = Status.Paid;
+        invoice.paidAt = block.timestamp;
+
+        // Interactions: external call after state is finalized
+        bool success = IERC20(invoice.token).transferFrom(
             msg.sender,
             invoice.recipient,
             invoice.amount
         );
-
-        // State update after external call (Slither will flag this)
-        invoice.status = Status.Paid;
-        invoice.paidAt = block.timestamp;
+        require(success, "Transfer failed");
 
         emit InvoiceStatusChanged(invoiceId, oldStatus, Status.Paid);
         emit PaymentReceived(invoiceId, msg.sender, invoice.amount);
