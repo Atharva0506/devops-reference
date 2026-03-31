@@ -86,7 +86,7 @@ contract InvoiceManager {
 
     /// @notice Pays an invoice using ERC-20 tokens.
     /// @param invoiceId The invoice to pay.
-    /// @audit Critical payment path - Slither should verify no reentrancy.
+    /// @dev Critical payment path - Slither should verify no reentrancy.
     function payInvoice(bytes32 invoiceId) external {
         Invoice storage invoice = invoices[invoiceId];
         if (invoice.creator == address(0)) revert InvoiceNotFound();

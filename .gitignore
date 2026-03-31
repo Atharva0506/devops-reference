@@ -3,7 +3,6 @@ out/
 cache/
 
 # Dependencies
-lib/
 node_modules/
 
 # Environment files

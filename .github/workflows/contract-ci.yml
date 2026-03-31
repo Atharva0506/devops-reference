@@ -16,11 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Install dependencies
+        run: forge install
 
       - name: Build contracts
         run: forge build
@@ -35,14 +40,24 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
+      - name: Install dependencies
+        run: forge install
+
       - name: Build contracts
         run: forge build
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
       - name: Install Slither
         run: pip3 install slither-analyzer
@@ -55,14 +70,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # Generate the comment markdown
           python3 tools/parse-slither.py slither-output.json > slither-comment.md
           EXIT_CODE=$?
-
-          # Post as PR comment
           gh pr comment "$PR_NUMBER" --body-file slither-comment.md
-
-          # Exit with the parse script's code (1 if HIGH findings)
           exit $EXIT_CODE
 
   gas-report:
@@ -74,11 +84,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Install dependencies
+        run: forge install
 
       - name: Generate PR snapshot
         run: forge snapshot --snap .gas-snapshot-pr
@@ -86,6 +100,7 @@ jobs:
       - name: Generate base snapshot
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
+          forge install
           forge snapshot --snap .gas-snapshot-base
           git checkout ${{ github.event.pull_request.head.sha }}
 
